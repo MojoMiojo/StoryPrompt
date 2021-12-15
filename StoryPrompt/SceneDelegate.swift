@@ -2,7 +2,7 @@
 //  SceneDelegate.swift
 //  StoryPrompt
 //
-//  Created by Studio Sol on 15/12/21.
+//  Created by Mozart Sousa on 15/12/21.
 //
 
 import UIKit
