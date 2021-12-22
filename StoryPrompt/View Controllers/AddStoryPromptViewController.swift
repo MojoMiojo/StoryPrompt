@@ -8,7 +8,7 @@
 import UIKit
 import PhotosUI
 
-class ViewController: UIViewController {
+class AddStoryPromptViewController: UIViewController {
 	
 	let storyPrompt = StoryPromptEntry()
 	
@@ -38,10 +38,9 @@ class ViewController: UIViewController {
 		updateStoryPrompt()
 		
 		if storyPrompt.isValid() {
-			print(storyPrompt)
-		}
-		else
-		{
+			performSegue(withIdentifier: "StoryPrompt", sender: nil)
+			//print(storyPrompt)
+		}	else {
 			let alert = UIAlertController(title: "Invalid Story Prompt", message: "Please fill out all of the fields", preferredStyle: .alert)
 			let action = UIAlertAction(title: "OK", style: .default, handler: {action in})
 			
@@ -49,8 +48,12 @@ class ViewController: UIViewController {
 			
 			present(alert, animated: true)
 		}//end else
-	}//end generateStoryPrompt
+	}
 	
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view.
@@ -59,20 +62,17 @@ class ViewController: UIViewController {
 		
 		numberSlider.value = 7.5
 		
-		storyPrompt.noun = "Toaster"
-		storyPrompt.adjective = "smelly"
-		storyPrompt.verb = "burps"
-		
-		storyPrompt.number = Int(numberSlider.value)
-		
 		storyPromptImageView.isUserInteractionEnabled = true
 		storyPromptImageView.addGestureRecognizer(gestureRecognizer)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateStoryPrompt), name: UIResponder.keyboardDidHideNotification, object: nil)
 	}//end viewDidLoad
 	
-	func updateStoryPrompt(){
+	@objc func updateStoryPrompt(){
 		storyPrompt.noun = nounTextField.text ?? ""
 		storyPrompt.adjective = adjectiveTextField.text ?? ""
 		storyPrompt.verb = verbTextField.text ?? ""
+		storyPrompt.number = Int(numberSlider.value)
 	}//end updateStoryPrompt
 	
 	@objc func changeImage(){
@@ -85,19 +85,27 @@ class ViewController: UIViewController {
 		controller.delegate = self
 		present(controller, animated: true)
 	}//end changeImage
-}//end viewController
+	
+	override func prepare ( for segue: UIStoryboardSegue, sender: Any?){
+		if segue.identifier == "StoryPrompt"{
+			guard let storyPromptViewController = segue.destination as? StoryPromptViewController else{
+				return
+			}
+			storyPromptViewController.storyPrompt = storyPrompt
+            storyPromptViewController.isNewStoryPrompt = true
+		}
+	}//end prepare`
+	
+}//end AddStoryPromptViewController
 
-extension ViewController : UITextFieldDelegate{
+extension AddStoryPromptViewController : UITextFieldDelegate{
 	func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-		
 		textField.resignFirstResponder()
-		updateStoryPrompt()
 		return true
-		
 	}//end textFieldShouldReturn
-}//end ViewController : UITextFieldDelegate
+}//end AddStoryPromptViewController : UITextFieldDelegate
 
-extension ViewController : PHPickerViewControllerDelegate{
+extension AddStoryPromptViewController : PHPickerViewControllerDelegate{
 	func picker(_ picker: PHPickerViewController, didFinishPicking results:[PHPickerResult]){
 		if !results.isEmpty{
 			let result = results.first!
@@ -114,4 +122,4 @@ extension ViewController : PHPickerViewControllerDelegate{
 			}
 		}
 	}//end picker
-}// end ViewController : PHPickerViewControllerDelegate
+}// end AddStoryPromptViewController : PHPickerViewControllerDelegate
